@@ -1,13 +1,13 @@
 #include <ATTCloudClient.h>
 
 // Longest variable is 32 chars
-PROGMEM const prog_uchar   M2MIO_USERNAME[]      = "mikesutton@gmail.com";
-PROGMEM const prog_uchar   M2MIO_PASSWORD[]      = "1eef665a480de5611d24d69bbbf3f4a2";    // MD5 key of password
-PROGMEM const prog_uchar  M2MIO_DOMAIN[]      =  "c7a7258f3eaf0df06f3feb8da7948b7b";
-PROGMEM const prog_uchar  M2MIO_DEVICE_TYPE[] =	 "things";
-PROGMEM const prog_uchar  M2MIO_DEVICE_ID[]   =  "device02";
+PROGMEM const prog_uchar   M2MIO_USERNAME[]      = "<m2m.io user>";
+PROGMEM const prog_uchar   M2MIO_PASSWORD[]      = "<m2m.io password>";    // MD5 key of password
+PROGMEM const prog_uchar  M2MIO_DOMAIN[]      =  "<m2m.io domain>";
+PROGMEM const prog_uchar  M2MIO_DEVICE_TYPE[] =	 "<device type / organization>";
+PROGMEM const prog_uchar  M2MIO_DEVICE_ID[]   =  "<unique device ID>";
 
-PROGMEM const prog_uchar M2MIO_CLIENT_ID[] =          "things/device02";
+PROGMEM const prog_uchar M2MIO_CLIENT_ID[] =          "<device type>/<unique device ID>";
 
 
 
