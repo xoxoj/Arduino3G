@@ -136,9 +136,8 @@ boolean ATTCloudClient::connect(char *id, char *user, char *pass, char* willTopi
                length = writeString(pass,buffer,length);
             }
          }
-         //Serial.println("101");
+
          write(MQTTCONNECT,buffer,length-5);
-         //Serial.println("102");
          
          lastInActivity = lastOutActivity = millis();
          
@@ -150,11 +149,7 @@ boolean ATTCloudClient::connect(char *id, char *user, char *pass, char* willTopi
             }
          }
 
-         //uint8_t llen;
-         //Serial.println("103");
          int len = readPacket(); //&llen);
-         //Serial.println("104");
-
          
          if (len == 4 && buffer[3] == 0) {
             lastInActivity = millis();
@@ -295,8 +290,6 @@ void ATTCloudClient::setDomainStuffThing(const prog_uchar *domain, const prog_uc
    progmem2ram(buffer,thing);
    topicStr.concat(buffer);//   topicStr.concat(thing);
    topicStr.toCharArray(pubTopic, topicStr.length()+1);
-
-   //Serial.println(pubTopic); // DEBUG
 }
 
 boolean ATTCloudClient::publish(char* domain, char* stuff, char* thing, char* payload) {
@@ -414,7 +407,6 @@ boolean ATTCloudClient::registerForCommands(void) {
    cmdTopicStr.concat(pubTopic);
    cmdTopicStr.concat("/cmd");
    cmdTopicStr.toCharArray(cmdTopic, cmdTopicStr.length()+1);
-   //Serial.println(cmdTopic); // DEBUG
    return subscribe(cmdTopic);
 }
 
@@ -528,8 +520,6 @@ boolean ATTCloudClient::subscribe(char* topic) {
    if (connected()) {
       // Leave room in the buffer for header and variable length field
       uint16_t length = 5;
-      //Serial.println(F("in subscribe"));
-      //Serial.println(topic);
       nextMsgId++;
       if (nextMsgId == 0) {
          nextMsgId = 1;
@@ -610,12 +600,12 @@ int ATT3GModemClient::connect(const char *host, uint16_t port) {
   uint8_t answer;
   power_on();
 
-  //Serial.println("Connecting to the network...");
+  Serial.println(F("Connecting to the network..."));
   while( (sendATcommand("AT+CREG?", "+CREG: 0,1", 500) || 
 	  sendATcommand("AT+CREG?", "+CREG: 0,5", 500)) == 0 );
 
   delay(2000);
-  //Serial.println("Connected to network");
+  Serial.println(F("Connected to network"));
   answer = sendATcommand("AT+CGSOCKCONT=1,\"IP\",\"m2m.com.attz\"", "OK", 20000);
 
   delay(1000);
@@ -628,10 +618,9 @@ int ATT3GModemClient::connect(const char *host, uint16_t port) {
   answer = sendATcommand(aux_str, "Network opened", 20000);
     
   if (answer == 1) {
-    //Serial.println("Network opened");
+    Serial.println(F("Network opened"));
     sprintf(aux_str, "AT+TCPCONNECT=\"%s\",%d", host, port);
     answer = sendATcommand(aux_str, "Connect ok", 20000);
-    //Serial.println("100");
   } else {
     Serial.println(F("Unable to open network."));
   }
@@ -650,14 +639,13 @@ size_t ATT3GModemClient::write(const uint8_t *buf, size_t size) {
 
   
   sprintf(aux_str, "AT+TCPWRITE=%d", size);
-  //Serial.println("100: Sent tcpwrite");
   answer = sendATcommand(aux_str, ">", 20000);
   delay(100);
   if (answer == 1) {
     //answer = sendATcommand(buf, "Send OK", 20000);  
     memset(aux_str,'\0', AUX_STR_LEN);
-    while( Serial.available() > 0) Serial.read();    // Clean the input buffer
-    Serial.write(buf,size);
+    while( Serial1.available() > 0) Serial1.read();    // Clean the input buffer
+    Serial1.write(buf,size);
 
     x = 0;
     answer = 0;
@@ -665,10 +653,10 @@ size_t ATT3GModemClient::write(const uint8_t *buf, size_t size) {
     previous = millis();
     do{
         // if there are data in the UART input buffer, reads it and checks for the asnwer
-        if(Serial.available() != 0){   
-	  if (x < AUX_STR_LEN) 
-            aux_str[x] = Serial.read();
-	  else {
+        if(Serial1.available() != 0){   
+	  if (x < AUX_STR_LEN) {
+            aux_str[x] = Serial1.read();
+	  } else {
 	    Serial.println(F("Overran aux_str_len in write while reading response."));
 	    return 0;
 	  }
@@ -745,10 +733,9 @@ int ATT3GModemClient::read(uint8_t *buf, size_t size) {
       } else
 	return -1;
     }
-
-    if(Serial.available() != 0){
+    if(Serial1.available() != 0){
       if ( i < AUX_STR_LEN) {
-	aux_str[i] = Serial.read();
+	aux_str[i] = Serial1.read();
 	i++;
       } else {
 	Serial.println(F("Overran aux_str in ATT3GModemClient::read"));
@@ -773,9 +760,9 @@ int ATT3GModemClient::read(uint8_t *buf, size_t size) {
   i = 0;
   previous = millis();
   do {
-    if ( Serial.available() > 0 ) {
+    if ( Serial1.available() > 0 ) {
       if ( i < size ) {
-	buf[i] = Serial.read();
+	buf[i] = Serial1.read();
 	i++;
       } else {
 	Serial.println(F("Attempted to read more than buffer size in ATT3GModemClient::read"));
@@ -807,6 +794,8 @@ int ATT3GModemClient::read(uint8_t *buf, size_t size) {
 void power_on(){
 
     uint8_t answer=0;
+
+    Serial.println(F("Powering on modem."));
     
     // checks if the module is started
     answer = sendATcommand("AT", "OK", 2000);
@@ -839,11 +828,10 @@ int8_t sendATcommand(char* ATcommand, char* expected_answer, unsigned int timeou
     memset(response, '\0', AT_RESPONSE_LEN);    // Initialice the string
     
     delay(100);
+    while( Serial1.available() > 0) Serial1.read();    // Clean the input buffer
     
-    while( Serial.available() > 0) Serial.read();    // Clean the input buffer
-    
-    Serial.println(ATcommand);    // Send the AT command 
-
+    Serial1.println(ATcommand);    // Send the AT command 
+    Serial.println(ATcommand);  // debug: echo to PC
 
     x = 0;
     previous = millis();
@@ -851,9 +839,9 @@ int8_t sendATcommand(char* ATcommand, char* expected_answer, unsigned int timeou
     // this loop waits for the answer
     do{
         // if there are data in the UART input buffer, reads it and checks for the asnwer
-        if(Serial.available() != 0){ 
+        if(Serial1.available() != 0){ 
 	  if (x < AT_RESPONSE_LEN) {
-            response[x] = Serial.read();
+            response[x] = Serial1.read();
 	  } else {
 	    Serial.println(F("Overan response buf in sendATcommand"));
 	    char tmp[10];
@@ -873,20 +861,10 @@ int8_t sendATcommand(char* ATcommand, char* expected_answer, unsigned int timeou
             }
         } // serial.available()
 
-	// if ( (millis() - previous) > timeout) {
-	//   Serial.println("Timeout in sendATcommand.");
-	//   char tmp[10];
-	//   sprintf(tmp,"read %d chars",x);
-	//   Serial.println(tmp);
-	//   Serial.println(aux_str);
-	//   return 0;
-	// }
-
-    // Waits for the asnwer with time out
     }while((answer == 0) && ((millis() - previous) < timeout));    
 
-    //response[x] = 0x00;
-    //Serial.println(response);
+    Serial.println(response);
+
     return answer;
 }
 
