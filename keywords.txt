@@ -1,0 +1,33 @@
+#######################################
+# Syntax Coloring Map For Ultrasound
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+ATTCloudClient	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+connect 	KEYWORD2
+disconnect 	KEYWORD2
+publish 	KEYWORD2
+subscribe 	KEYWORD2
+loop 	KEYWORD2
+connected 	KEYWORD2
+
+setDomainStuffThing	KEYWORD2
+registerForCommands	KEYWORD2
+sendKV	KEYWORD2
+startMessage	KEYWORD2
+addKVToMessage	KEYWORD2
+sendMessage	KEYWORD2
+endMessage	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+

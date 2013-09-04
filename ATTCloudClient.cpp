@@ -41,7 +41,8 @@ ATTCloudClient::ATTCloudClient(char* domain, uint16_t port, void (*callback)(cha
 ATTCloudClient::ATTCloudClient(void (*callback)(char*,uint8_t*,unsigned int), Client& client) {
    this->_client = &client;
    this->callback = callback;
-   this->domain = "q.m2m.io";
+   //this->domain = "q.m2m.io";
+   this->domain = "att-q.m2m.io";
    //this->domain = "75.71.157.10";
    //this->domain = "54.243.165.1";
    this->port = 1883;
