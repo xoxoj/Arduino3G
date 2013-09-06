@@ -1,11 +1,10 @@
 #include <ATTCloudClient.h>
-#include "Timer.h"
 
 // Longest variable is 32 chars
-PROGMEM const prog_uchar   M2MIO_USERNAME[]    = "<username>";
+PROGMEM const prog_uchar   M2MIO_USERNAME[]    = "<user>";
 PROGMEM const prog_uchar   M2MIO_PASSWORD[]    = "<MD5 sum of password (32 characters)>";
-PROGMEM const prog_uchar  M2MIO_DOMAIN[]       = "<domain>;
-PROGMEM const prog_uchar  M2MIO_DEVICE_TYPE[]  = "<device type>";
+PROGMEM const prog_uchar  M2MIO_DOMAIN[]       = "<domain>";
+PROGMEM const prog_uchar  M2MIO_DEVICE_TYPE[]  = "<device types>";
 PROGMEM const prog_uchar  M2MIO_DEVICE_ID[]    = "<device ID>";
 
 #define REPORTING_INTERVAL_MS  3000
@@ -13,10 +12,8 @@ PROGMEM const prog_uchar  M2MIO_DEVICE_ID[]    = "<device ID>";
 ATTCloudClient acc;
 ATT3GModemClient c;
 
-Timer t;
-
-int sensorPin = A0;   // Sensing voltage on analog pin 0
-int sensorValue = 0;  // sensor reading
+// LED PIN
+int ledPin = 7;
 
 void cmdCallBack(char *topic, uint8_t* payload, unsigned int len);
 
@@ -28,7 +25,10 @@ void setup() {
   Serial.begin(9600); // port to communicate to PC
   Serial1.begin(115200); // port that talks to 3G modem
 
-  Serial.println(F("Sensor Loop"));
+  // set led pin as output
+  pinMode(ledPin, OUTPUT);
+
+  Serial.println(F("LED Control"));
 
   c = ATT3GModemClient();
   acc = ATTCloudClient(cmdCallBack,c);
@@ -40,27 +40,22 @@ void setup() {
 
   acc.setDomainStuffThing(M2MIO_DOMAIN,M2MIO_DEVICE_TYPE,M2MIO_DEVICE_ID);
 
-  //acc.registerForCommands();
-  
-  int sensorEvent = t.every(REPORTING_INTERVAL_MS, getSensorValue);
+  acc.registerForCommands();
 }
 
 void loop() {
   delay(200);
   acc.loop();
-  t.update();
 }
 
 void cmdCallBack(char *topic, uint8_t* payload, unsigned int len) {
-  Serial.println(F("In the cmdCallBack()"));
-  Serial.println((char*)payload);
-}
+  Serial.println(F("Command Recieved"));
 
-void getSensorValue() {
-  Serial.println(F("sensor read"));
-
-  // read value from sensor
-  sensorValue = analogRead(sensorPin);    
-  
-  acc.sendKV("sensor_val", sensorValue);
+  if (acc.commandCompare("{\"light\":\"on\"}", payload, len)) {
+    digitalWrite(ledPin, HIGH);
+  } else if (acc.commandCompare("{\"light\":\"off\"}", payload, len)) {
+    digitalWrite(ledPin, LOW);
+  } else {
+    Serial.println(F("No match"));
+  }
 }
