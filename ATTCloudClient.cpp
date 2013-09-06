@@ -598,18 +598,25 @@ int ATT3GModemClient::connect(const char *host, uint16_t port) {
   uint8_t answer;
   power_on();
 
-  Serial.println(F("Connecting to the network..."));
-  while( (sendATcommand("AT+CREG?", "+CREG: 0,1", 500) || 
-	  sendATcommand("AT+CREG?", "+CREG: 0,5", 500)) == 0 );
-
   delay(2000);
   Serial.println(F("Connected to network"));
   answer = sendATcommand("AT+CGSOCKCONT=1,\"IP\",\"m2m.com.attz\"", "OK", 20000);
 
-  delay(1000);
+  delay(2000);
 
   if (!answer)
     return 0;
+
+  Serial.println(F("Connecting to the network..."));
+  answer = sendATcommand("AT+CGATT=1", "OK", 20000);
+  
+  delay(1000);
+
+  if(!answer) {
+    Serial.println(F("Error attaching.\n"));
+    while(true);
+  }
+
     
   //sendATcommand("AT+NETCLOSE","OK",2000);
   sprintf(aux_str, "AT+NETOPEN=\"TCP\""); 
