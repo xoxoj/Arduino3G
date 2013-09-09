@@ -617,6 +617,15 @@ int ATT3GModemClient::connect(const char *host, uint16_t port) {
     while(true);
   }
 
+  Serial.println(F("PDP Context..."));
+  answer = sendATcommand("AT+CGACT=1,1", "OK", 20000);
+  
+  delay(1000);
+
+  if(!answer) {
+    Serial.println(F("Error in PDP context.\n"));
+    while(true);
+  }
     
   //sendATcommand("AT+NETCLOSE","OK",2000);
   sprintf(aux_str, "AT+NETOPEN=\"TCP\""); 
