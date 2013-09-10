@@ -610,12 +610,14 @@ int ATT3GModemClient::connect(const char *host, uint16_t port) {
   Serial.println(F("Connecting to the network..."));
   answer = sendATcommand("AT+CGATT=1", "OK", 20000);
   
-  delay(1000);
+  delay(2000);
 
+  /*
   if(!answer) {
     Serial.println(F("Error attaching.\n"));
     while(true);
   }
+  */
 
   Serial.println(F("PDP Context..."));
   answer = sendATcommand("AT+CGACT=1,1", "OK", 20000);
